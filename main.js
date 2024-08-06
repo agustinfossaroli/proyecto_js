@@ -1,72 +1,91 @@
-let nombre = prompt('Bienvenido a Mi Tienda. Por favor, ingrese su nombre: ');
+document.addEventListener('DOMContentLoaded', () => {
+    const formularioUsuario = document.getElementById('formulario-usuario');
+    const listaProductos = document.getElementById('lista-productos');
+    const listaCarrito = document.getElementById('lista-carrito');
+    const totalCarrito = document.getElementById('total-carrito');
+    const finalizarCompra = document.getElementById('finalizar-compra');
+    const productosDiv = document.getElementById('productos');
+    const carritoDiv = document.getElementById('carrito');
+    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 
-let edad;
-while (true) {
-    edad = prompt('Hola ' + nombre + ', ¿eres mayor de 18 años? (si/no)').toLowerCase();
-    if (edad === 'si' || edad === 'no') {
-        break;
-    } else {
-        alert("Respuesta no válida. Por favor, ingrese 'si' o 'no'.");
-    }
-}
+    formularioUsuario.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const nombre = document.getElementById('nombre').value;
+        const edad = document.getElementById('edad').value;
 
-function mostrarProductos(filtrarAlcohol) {
-    let productosDisponibles = filtrarAlcohol
-        ? productos.filter(producto => producto.bebida === 'Sin alcohol')
-        : productos;
-
-    let mensaje = 'Productos disponibles:\n';
-    productosDisponibles.forEach(producto => {
-        mensaje += `${producto.nombre} - $${producto.precio}\n`;
+        if (nombre && edad) {
+            localStorage.setItem('nombre', nombre);
+            localStorage.setItem('edad', edad);
+            mostrarProductos(edad === 'no');
+            productosDiv.style.display = 'block';
+            carritoDiv.style.display = 'block';
+        }
     });
-    alert(mensaje);
-    return productosDisponibles;
-}
 
-let productosDisponibles = mostrarProductos(edad === 'no');
+    function mostrarProductos(filtrarAlcohol) {
+        listaProductos.innerHTML = '';
+        const productosDisponibles = filtrarAlcohol
+            ? productos.filter(producto => producto.bebida === 'Sin alcohol')
+            : productos;
 
-let carrito = [];
-let seleccion;
+        productosDisponibles.forEach(producto => {
+            const li = document.createElement('li');
+            li.innerHTML = `${producto.nombre} - $${producto.precio} 
+                            <button data-id="${producto.id}">Agregar al carrito</button>`;
+            listaProductos.appendChild(li);
+        });
+    }
 
-do {
-    seleccion = prompt('Ingrese el nombre del producto que desea agregar al carrito o escriba "finalizar" para terminar: ').toLowerCase();
-    if (seleccion !== 'finalizar') {
-        let productoSeleccionado = productosDisponibles.find(producto => producto.nombre.toLowerCase() === seleccion);
+    listaProductos.addEventListener('click', (event) => {
+        if (event.target.tagName === 'BUTTON') {
+            const productoId = parseInt(event.target.getAttribute('data-id'));
+            agregarAlCarrito(productoId);
+        }
+    });
+
+    function agregarAlCarrito(productoId) {
+        const productoSeleccionado = productos.find(producto => producto.id === productoId);
         if (productoSeleccionado) {
-            let cantidad = parseInt(prompt(`¿Cuántas unidades de ${productoSeleccionado.nombre} desea agregar?`));
-            if (cantidad > 0) {
-                let productoEnCarrito = carrito.find(producto => producto.nombre === productoSeleccionado.nombre);
-                if (productoEnCarrito) {
-                    productoEnCarrito.cantidad += cantidad;
-                } else {
-                    carrito.push({ ...productoSeleccionado, cantidad: cantidad });
-                }
-                alert(`Se agregaron ${cantidad} unidades de ${productoSeleccionado.nombre} al carrito.`);
+            const productoEnCarrito = carrito.find(producto => producto.id === productoSeleccionado.id);
+            if (productoEnCarrito) {
+                productoEnCarrito.cantidad += 1;
             } else {
-                alert('Cantidad no válida.');
+                carrito.push({ ...productoSeleccionado, cantidad: 1 });
             }
-        } else {
-            alert('Producto no encontrado.');
+            actualizarCarrito();
         }
     }
-} while (seleccion !== 'finalizar');
 
-let total = carrito.reduce((acc, producto) => acc + (producto.precio * producto.cantidad), 0);
-alert(`Gracias por su compra, ${nombre}. El total es $${total}.`);
+    function actualizarCarrito() {
+        listaCarrito.innerHTML = '';
+        let total = 0;
 
+        carrito.forEach(producto => {
+            const li = document.createElement('li');
+            li.innerHTML = `${producto.nombre} - ${producto.cantidad} unidades - $${producto.precio * producto.cantidad}`;
+            listaCarrito.appendChild(li);
+            total += producto.precio * producto.cantidad;
+        });
 
-let detalleCarrito = 'Detalle del carrito:\n';
-carrito.forEach(producto => {
-    detalleCarrito += `${producto.nombre} - ${producto.cantidad} unidades - $${producto.precio * producto.cantidad}\n`;
+        totalCarrito.innerHTML = `Total: $${total}`;
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+    }
+
+    finalizarCompra.addEventListener('click', () => {
+        const nombre = localStorage.getItem('nombre');
+        alert(`Gracias por su compra, ${nombre}. El total es $${totalCarrito.innerText.replace('Total: $', '')}.`);
+        carrito = [];
+        localStorage.removeItem('carrito');
+        actualizarCarrito();
+    });
+
+    // Si hay un carrito en localStorage, actualizar el DOM
+    if (carrito.length > 0) {
+        productosDiv.style.display = 'block';
+        carritoDiv.style.display = 'block';
+        actualizarCarrito();
+    }
 });
-alert(detalleCarrito);
-
-
-
-
-
-
-
 
 
 

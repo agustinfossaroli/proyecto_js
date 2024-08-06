@@ -6,7 +6,30 @@
     <title>Tienda de bebidas</title>
 </head>
 <body>
-    
+    <h1>Bienvenido a Mi Tienda</h1>
+    <div id="user-form">
+        <form id="formulario-usuario">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" required>
+            <label for="edad">¿Eres mayor de 18 años?</label>
+            <select id="edad" required>
+                <option value="">Seleccione una opción</option>
+                <option value="si">Sí</option>
+                <option value="no">No</option>
+            </select>
+            <button type="submit">Ingresar</button>
+        </form>
+    </div>
+    <div id="productos" style="display: none;">
+        <h2>Productos disponibles</h2>
+        <ul id="lista-productos"></ul>
+    </div>
+    <div id="carrito" style="display: none;">
+        <h2>Carrito de Compras</h2>
+        <ul id="lista-carrito"></ul>
+        <p id="total-carrito"></p>
+        <button id="finalizar-compra">Finalizar Compra</button>
+    </div>
     <script src="productos.js"></script>
     <script src="main.js"></script>
 </body>
