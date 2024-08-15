@@ -3,10 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="styles.css">
     <title>Tienda de bebidas</title>
 </head>
 <body>
-    <h1>Bienvenido a Mi Tienda</h1>
+    <header>
+        <h1>Bienvenido a Mi Tienda</h1>
+    </header>
+    
     <div id="user-form">
         <form id="formulario-usuario">
             <label for="nombre">Nombre:</label>
@@ -20,16 +26,19 @@
             <button type="submit">Ingresar</button>
         </form>
     </div>
+
     <div id="productos" style="display: none;">
         <h2>Productos disponibles</h2>
         <ul id="lista-productos"></ul>
     </div>
+
     <div id="carrito" style="display: none;">
         <h2>Carrito de Compras</h2>
         <ul id="lista-carrito"></ul>
         <p id="total-carrito"></p>
         <button id="finalizar-compra">Finalizar Compra</button>
     </div>
+
     <script src="productos.js"></script>
     <script src="main.js"></script>
 </body>

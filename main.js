@@ -6,21 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalizarCompra = document.getElementById('finalizar-compra');
     const productosDiv = document.getElementById('productos');
     const carritoDiv = document.getElementById('carrito');
-    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-
-    formularioUsuario.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const nombre = document.getElementById('nombre').value;
-        const edad = document.getElementById('edad').value;
-
-        if (nombre && edad) {
-            localStorage.setItem('nombre', nombre);
-            localStorage.setItem('edad', edad);
-            mostrarProductos(edad === 'no');
-            productosDiv.style.display = 'block';
-            carritoDiv.style.display = 'block';
-        }
-    });
+    let carrito = JSON.parse(sessionStorage.getItem('carrito')) || [];
+    let productos = [];
 
     function mostrarProductos(filtrarAlcohol) {
         listaProductos.innerHTML = '';
@@ -30,11 +17,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
         productosDisponibles.forEach(producto => {
             const li = document.createElement('li');
-            li.innerHTML = `${producto.nombre} - $${producto.precio} 
+            li.innerHTML = `${producto.nombre} - $${producto.precio}
                             <button data-id="${producto.id}">Agregar al carrito</button>`;
             listaProductos.appendChild(li);
         });
     }
+
+    fetch('productos.json')
+        .then(response => response.json())
+        .then(data => {
+            productos = data;
+
+            const edad = sessionStorage.getItem('edad');
+            if (edad) {
+                mostrarProductos(edad === 'no');
+                productosDiv.style.display = 'block';
+                carritoDiv.style.display = 'block';
+            }
+        });
+
+    formularioUsuario.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const nombre = document.getElementById('nombre').value.trim();
+        const edad = document.getElementById('edad').value;
+
+        if (nombre && edad) {
+            sessionStorage.setItem('nombre', nombre);
+            sessionStorage.setItem('edad', edad);
+
+            productosDiv.style.display = 'block';
+            carritoDiv.style.display = 'block';
+            mostrarProductos(edad === 'no');
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debes ingresar todos los datos.',
+                icon: 'warning'
+            });
+        }
+    });
 
     listaProductos.addEventListener('click', (event) => {
         if (event.target.tagName === 'BUTTON') {
@@ -53,6 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 carrito.push({ ...productoSeleccionado, cantidad: 1 });
             }
             actualizarCarrito();
+            Toastify({
+                text: "Producto agregado al carrito",
+                duration: 3000
+            }).showToast();
         }
     }
 
@@ -68,24 +93,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         totalCarrito.innerHTML = `Total: $${total}`;
-        localStorage.setItem('carrito', JSON.stringify(carrito));
+        sessionStorage.setItem('carrito', JSON.stringify(carrito));
     }
 
     finalizarCompra.addEventListener('click', () => {
-        const nombre = localStorage.getItem('nombre');
-        alert(`Gracias por su compra, ${nombre}. El total es $${totalCarrito.innerText.replace('Total: $', '')}.`);
+        const nombre = sessionStorage.getItem('nombre');
+        Swal.fire({
+            title: 'Gracias por su compra',
+            text: `Gracias por su compra, ${nombre}. El total es $${totalCarrito.innerText.replace('Total: $', '')}.`,
+            icon: 'success'
+        });
         carrito = [];
-        localStorage.removeItem('carrito');
+        sessionStorage.removeItem('carrito');
         actualizarCarrito();
     });
 
-    // Si hay un carrito en localStorage, actualizar el DOM
     if (carrito.length > 0) {
         productosDiv.style.display = 'block';
         carritoDiv.style.display = 'block';
         actualizarCarrito();
     }
 });
+
 
 
 
